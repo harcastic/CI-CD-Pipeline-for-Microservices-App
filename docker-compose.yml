@@ -3,7 +3,7 @@ version: "3.0"
 services:
 
   auth:
-    build: ./backend/auth-service
+    build: harcastic/auth-service
     container_name: auth-service
     restart: always
     env_file:
@@ -12,16 +12,16 @@ services:
       - "5001:5001"
 
   blog:
-    build: ./backend/blog-service
+    build: harcastic/blog-service
     container_name: blog-service
-    restart: always
+    restart: always 
     env_file:
       - ./backend/blog-service/.env
     ports:
       - "5002:5002"
 
   gateway:
-    build: ./backend/gateway
+    build: harcastic/gateway
     container_name: gateway
     restart: always
     env_file:
@@ -33,7 +33,7 @@ services:
       - blog
 
   frontend:
-    build: ./frontend
+    build: harcastic/frontend
     container_name: frontend
     restart: always
     ports:

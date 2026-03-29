@@ -23,23 +23,34 @@ jobs:
       # 3. Build & Push Auth Service
       - name: Build & Push Auth
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service ./backend/auth-service
-          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:latest ./backend/auth-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
 
       # 4. Blog Service
       - name: Build & Push Blog
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/blog-service ./backend/blog-service
-          docker push ${{ secrets.DOCKER_USERNAME }}/blog-service
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/blog-service:latest ./backend/blog-service
+          docker push ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
 
       # 5. API Gateway
       - name: Build & Push Gateway
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway ./backend/gateway
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./backend/gateway
+          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
 
       # 6. Frontend
       - name: Build & Push Frontend
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend ./frontend
-          docker push ${{ secrets.DOCKER_USERNAME }}/frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd devops-app || exit
+            docker-compose pull
+            docker-compose up -d --remove-orphans
