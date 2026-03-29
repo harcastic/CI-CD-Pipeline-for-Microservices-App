@@ -1,50 +1,48 @@
-name: Build & Push Docker Images
+name: Build & Deploy Dockerized Blog App
 
 on:
   push:
     branches: ["main"]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
+      # 1. Checkout repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Login to DockerHub
-      - name: Login to DockerHub
+      # 2. Login to Docker Hub
+      - name: DockerHub Login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Build & Push Auth Service
+      # 3. Build & push all images
       - name: Build & Push Auth
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/auth-service:latest ./backend/auth-service
           docker push ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
 
-      # 4. Blog Service
       - name: Build & Push Blog
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/blog-service:latest ./backend/blog-service
           docker push ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
 
-      # 5. API Gateway
       - name: Build & Push Gateway
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./backend/gateway
           docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
 
-      # 6. Frontend
       - name: Build & Push Frontend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
           docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
-      - name: Deploy to Azure VM
+      # 4. Deploy to VM
+      - name: Deploy All Services
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VM_HOST }}
@@ -52,5 +50,20 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd devops-app || exit
-            docker-compose pull
-            docker-compose up -d --remove-orphans
+            # Pull latest images
+            docker pull ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+            # Clean old containers to avoid 'ContainerConfig' errors
+            docker-compose down --remove-orphans
+
+            # Ensure nginx.conf exists
+            if [ ! -f ./nginx.conf ]; then
+              echo "ERROR: nginx.conf missing"
+              exit 1
+            fi
+
+            # Start all services
+            docker-compose up -d
