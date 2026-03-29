@@ -5,7 +5,7 @@ services:
   auth:
     build: harcastic/auth-service
     container_name: auth-service
-    restart: always
+    restart: always 
     env_file:
       - ./backend/auth-service/.env
     ports:
