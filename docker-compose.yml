@@ -1,17 +1,19 @@
-version: "3.0"
+version: "3.8"
 
 services:
-
   auth:
     image: ${DOCKER_USERNAME}/auth-service:latest
     container_name: auth-service
     restart: always 
     pull_policy: always
-    env_file:
-      - ./backend/auth-service/.env
     ports:
       - "5001:5001"
     environment:
+      - PORT=5001
+      - SERVICE_NAME=auth-service
+      - MONGO_URI=${AUTH_MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=30d
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
 
   blog:
@@ -19,27 +21,31 @@ services:
     container_name: blog-service
     restart: always 
     pull_policy: always
-    env_file:
-      - ./backend/blog-service/.env
     ports:
       - "5002:5002"
     environment:
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - PORT=5002
+      - SERVICE_NAME=blog-service
+      - MONGO_URI=${BLOG_MONGO_URI}
       - AUTH_SERVICE_URL=http://auth:5001
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
 
   gateway:
     image: ${DOCKER_USERNAME}/gateway:latest
     container_name: gateway
     restart: always
     pull_policy: always
-    env_file:
-      - ./backend/gateway/.env
     ports:
       - "5000:5000"
     environment:
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - PORT=5000
+      - SERVICE_NAME=api-gateway
+      - NODE_ENV=production
       - AUTH_SERVICE_URL=http://auth:5001
       - BLOG_SERVICE_URL=http://blog:5002
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX=100
     depends_on:
       - auth
       - blog
@@ -53,7 +59,6 @@ services:
       - "3000:3000"
     depends_on:
       - gateway
-
 
   nginx:
     image: nginx:latest

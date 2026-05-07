@@ -51,7 +51,10 @@ jobs:
           script: |
             cd devops-app || exit
             export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            export ALLOWED_ORIGINS=http://${{ secrets.VM_HOST }},http://localhost:3000
+            export ALLOWED_ORIGINS=http://${{ secrets.VM_HOST }},http://localhost:3000,http://${{ secrets.VM_HOST }}:3000
+            export AUTH_MONGO_URI="${{ secrets.AUTH_MONGO_URI }}"
+            export BLOG_MONGO_URI="${{ secrets.BLOG_MONGO_URI }}"
+            export JWT_SECRET="${{ secrets.JWT_SECRET }}"
             echo  "Pulling latest images "
             docker pull ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
