@@ -3,27 +3,30 @@ version: "3.0"
 services:
 
   auth:
-    build: harcastic/auth-service
+    image: harcastic/auth-service:latest
     container_name: auth-service
     restart: always 
+    pull_policy: always
     env_file:
       - ./backend/auth-service/.env
     ports:
       - "5001:5001"
 
   blog:
-    build: harcastic/blog-service
+    image: harcastic/blog-service:latest
     container_name: blog-service
     restart: always 
+    pull_policy: always
     env_file:
       - ./backend/blog-service/.env
     ports:
       - "5002:5002"
 
   gateway:
-    build: harcastic/gateway
+    image: harcastic/gateway:latest
     container_name: gateway
     restart: always
+    pull_policy: always
     env_file:
       - ./backend/gateway/.env
     ports:
@@ -33,9 +36,10 @@ services:
       - blog
 
   frontend:
-    build: harcastic/frontend
+    image: harcastic/frontend:latest
     container_name: frontend
     restart: always
+    pull_policy: always
     ports:
       - "3000:3000"
     depends_on:
@@ -49,7 +53,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - frontend
       - gateway

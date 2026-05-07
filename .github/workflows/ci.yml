@@ -33,8 +33,8 @@ jobs:
 
       - name: Build & Push Gateway
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest ./backend/gateway
-          docker push ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/gateway:latest ./backend/gateway
+          docker push ${{ secrets.DOCKER_USERNAME }}/gateway:latest
 
       - name: Build & Push Frontend
         run: |
@@ -50,20 +50,26 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd devops-app || exit
-            # Pull latest images
+            echo  "Pulling latest images "
             docker pull ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
-            docker pull ${{ secrets.DOCKER_USERNAME }}/api-gateway:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/gateway:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
-            # Clean old containers to avoid 'ContainerConfig' errors
+            echo "Clean old containers to avoid 'ContainerConfig' errors"
             docker-compose down --remove-orphans
 
-            # Ensure nginx.conf exists
-            if [ ! -f ./nginx.conf ]; then
+            echo "Ensure nginx.conf exists"
+            if [ ! -f ./nginx/nginx.conf ]; then
               echo "ERROR: nginx.conf missing"
               exit 1
             fi
+            
+            echo "Stopping old containers..."
+            docker-compose down --remove-orphans
 
-            # Start all services
+            echo "Starting updated containers..."
             docker-compose up -d
+
+            echo "Cleaning unused images..."
+            docker image prune -af
