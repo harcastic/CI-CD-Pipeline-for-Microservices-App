@@ -73,5 +73,17 @@ jobs:
             echo "Starting updated containers..."
             docker-compose up -d --remove-orphans
 
+            echo "Waiting for services to stabilize..."
+            sleep 10
+
+            echo "Checking service status..."
+            docker ps
+
+            # If any container is not healthy/running, show logs
+            if [ $(docker ps --filter "status=restarting" -q | wc -l) -gt 0 ] || [ $(docker ps --filter "status=exited" -q | wc -l) -gt 0 ]; then
+              echo "❌ ERROR: One or more containers are failing. Fetching logs..."
+              docker-compose logs
+            fi
+
             echo "Cleaning unused images..."
             docker image prune -af

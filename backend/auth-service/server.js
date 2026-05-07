@@ -5,6 +5,16 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
 dotenv.config();
+
+// Pre-flight check
+const requiredEnv = ["MONGO_URI", "JWT_SECRET"];
+const missingEnv = requiredEnv.filter(env => !process.env[env]);
+if (missingEnv.length > 0) {
+  console.error(`\n❌ [FATAL] Missing required environment variables: ${missingEnv.join(", ")}`);
+  console.error(`Please check your GitHub Secrets and deployment configuration.\n`);
+  process.exit(1);
+}
+
 connectDB();
 
 const app = express();

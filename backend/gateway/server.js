@@ -123,6 +123,8 @@ const createProxy = (target) => {
       res.status(503).json({
         success: false,
         message: "Service temporarily unavailable",
+        target: target,
+        error: err.message
       });
     },
   });
