@@ -50,6 +50,8 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             cd devops-app || exit
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            export ALLOWED_ORIGINS=http://${{ secrets.VM_HOST }},http://localhost:3000
             echo  "Pulling latest images "
             docker pull ${{ secrets.DOCKER_USERNAME }}/auth-service:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/blog-service:latest
@@ -65,11 +67,8 @@ jobs:
               exit 1
             fi
             
-            echo "Stopping old containers..."
-            docker-compose down --remove-orphans
-
             echo "Starting updated containers..."
-            docker-compose up -d
+            docker-compose up -d --remove-orphans
 
             echo "Cleaning unused images..."
             docker image prune -af

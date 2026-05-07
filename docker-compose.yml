@@ -3,7 +3,7 @@ version: "3.0"
 services:
 
   auth:
-    image: harcastic/auth-service:latest
+    image: ${DOCKER_USERNAME}/auth-service:latest
     container_name: auth-service
     restart: always 
     pull_policy: always
@@ -11,9 +11,11 @@ services:
       - ./backend/auth-service/.env
     ports:
       - "5001:5001"
+    environment:
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
 
   blog:
-    image: harcastic/blog-service:latest
+    image: ${DOCKER_USERNAME}/blog-service:latest
     container_name: blog-service
     restart: always 
     pull_policy: always
@@ -21,9 +23,12 @@ services:
       - ./backend/blog-service/.env
     ports:
       - "5002:5002"
+    environment:
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - AUTH_SERVICE_URL=http://auth:5001
 
   gateway:
-    image: harcastic/gateway:latest
+    image: ${DOCKER_USERNAME}/gateway:latest
     container_name: gateway
     restart: always
     pull_policy: always
@@ -31,12 +36,14 @@ services:
       - ./backend/gateway/.env
     ports:
       - "5000:5000"
+    environment:
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     depends_on:
       - auth
       - blog
 
   frontend:
-    image: harcastic/frontend:latest
+    image: ${DOCKER_USERNAME}/frontend:latest
     container_name: frontend
     restart: always
     pull_policy: always

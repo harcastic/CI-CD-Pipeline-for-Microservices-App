@@ -24,7 +24,7 @@ export default function BlogCard({ blog, onDelete }) {
     setDeleting(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/blogs/${blog._id}`, {
+      const res = await fetch(`/api/blogs/${blog._id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
