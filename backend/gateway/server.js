@@ -104,15 +104,14 @@ const createProxy = (target) => {
         Object.keys(req.body).length > 0 &&
         ["POST", "PUT", "PATCH"].includes(req.method)
       ) {
-        const bodyData = JSON.stringify(req.body);
-
-        proxyReq.setHeader("Content-Type", "application/json");
-        proxyReq.setHeader(
-          "Content-Length",
-          Buffer.byteLength(bodyData)
-        );
-
-        proxyReq.write(bodyData);
+        try {
+          const bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        } catch (err) {
+          console.error(`[${SERVICE_NAME}] Error restreaming body:`, err);
+        }
       }
     },
 
