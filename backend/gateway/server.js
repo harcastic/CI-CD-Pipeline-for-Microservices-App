@@ -39,7 +39,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : "*",
     credentials: true,
   })
 );
@@ -90,7 +90,7 @@ const createProxy = (target) => {
   return createProxyMiddleware({
     target,
     changeOrigin: true,
-
+    xfwd: true,
     timeout: 10000,
     proxyTimeout: 10000,
 

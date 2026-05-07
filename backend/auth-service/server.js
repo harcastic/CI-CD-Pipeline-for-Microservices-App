@@ -60,7 +60,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`[${SERVICE_NAME}] Running on port ${PORT}`);
-  console.log(`[${SERVICE_NAME}] Health: http://localhost:${PORT}/health`);
+  console.log(`[${SERVICE_NAME}] Health: http://0.0.0.0:${PORT}/health`);
 });
